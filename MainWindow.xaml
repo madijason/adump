@@ -1,0 +1,17 @@
+﻿<Window x:Class="ADUMP.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ADUMP"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Button Content="Importer des utilisateurs" Click="ImportUsersButton_Click" Margin="10"/>
+            <Button Content="Afficher la liste des utilisateurs" Click="ShowUsersButton_Click" Margin="10"/>
+            <Button Content="Configuration du logiciel" Click="ConfigurationButton_Click" Margin="10"/>
+        </StackPanel>
+        <TextBlock Text="Version 1.0" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10"/>
+    </Grid>
+</Window>
