@@ -1,16 +1,110 @@
 ﻿<Window x:Class="ADUMP.ListUser"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:adump="clr-namespace:ADUMP"
-        Title="ListUser" Height="300" Width="500">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        xmlns:adump="clr-namespace:ADUMP"
+        Title="Liste des utilisateurs" Height="600" Width="1000"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BackgroundBrush}">
+    
     <Grid>
-        <DataGrid Name="dgUsers" AutoGenerateColumns="False">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Nom" Binding="{Binding LastName}" />
-                <DataGridTextColumn Header="Prénom" Binding="{Binding FirstName}" />
-                <DataGridTextColumn Header="Nom d'utilisateur" Binding="{Binding Username}" />
-                <DataGridTextColumn Header="Email" Binding="{Binding Email}" />
-                <DataGridTextColumn Header="Classe" Binding="{Binding Class}" />
-            </DataGrid.Columns>
-        </DataGrid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="{StaticResource PrimaryBrush}" Padding="24,16">
+            <StackPanel>
+                <TextBlock Text="👥 Liste des utilisateurs" 
+                          FontFamily="Segoe UI" 
+                          FontSize="24" 
+                          FontWeight="Light" 
+                          Foreground="White"
+                          HorizontalAlignment="Center"/>
+                <TextBlock Text="Gestion des utilisateurs Active Directory" 
+                          Style="{StaticResource CaptionStyle}" 
+                          Foreground="#B3FFFFFF"
+                          HorizontalAlignment="Center"
+                          Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Content -->
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="24">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Statistics/Info Bar -->
+                <Border Grid.Row="0" Background="#F8F9FA" CornerRadius="4" Padding="16,8" Margin="0,0,0,16">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="📊" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Utilisateurs du domaine Active Directory"
+                                  Style="{StaticResource SubheadingStyle}"
+                                  Margin="0"
+                                  VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- DataGrid -->
+                <DataGrid Name="dgUsers" 
+                         Grid.Row="1"
+                         Style="{StaticResource ModernDataGridStyle}"
+                         AutoGenerateColumns="False"
+                         CanUserAddRows="False"
+                         CanUserDeleteRows="False"
+                         SelectionMode="Single"
+                         HeadersVisibility="Column">
+                    
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontWeight" Value="Medium"/>
+                            <Setter Property="FontFamily" Value="Segoe UI"/>
+                            <Setter Property="FontSize" Value="13"/>
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.CellStyle>
+                    
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="MinHeight" Value="40"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#F5F5F5"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+                    
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="👤 Nom" Binding="{Binding LastName}" Width="*" MinWidth="120"/>
+                        <DataGridTextColumn Header="👤 Prénom" Binding="{Binding FirstName}" Width="*" MinWidth="120"/>
+                        <DataGridTextColumn Header="🏷️ Nom d'utilisateur" Binding="{Binding Username}" Width="*" MinWidth="150"/>
+                        <DataGridTextColumn Header="📧 Email" Binding="{Binding Email}" Width="2*" MinWidth="200"/>
+                        <DataGridTextColumn Header="🏫 Classe" Binding="{Binding Class}" Width="*" MinWidth="100"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
