@@ -5,13 +5,116 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ADUMP"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="ADUMP - Gestion Active Directory" Height="600" Width="900"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BackgroundBrush}">
+    
     <Grid>
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Button Content="Importer des utilisateurs" Click="ImportUsersButton_Click" Margin="10"/>
-            <Button Content="Afficher la liste des utilisateurs" Click="ShowUsersButton_Click" Margin="10"/>
-            <Button Content="Configuration du logiciel" Click="ConfigurationButton_Click" Margin="10"/>
-        </StackPanel>
-        <TextBlock Text="Version 1.0" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10"/>
+        <!-- Header Section -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="{StaticResource PrimaryBrush}" Padding="24,16">
+            <StackPanel>
+                <TextBlock Text="ADUMP" 
+                          FontFamily="Segoe UI" 
+                          FontSize="28" 
+                          FontWeight="Light" 
+                          Foreground="White"
+                          HorizontalAlignment="Center"/>
+                <TextBlock Text="Active Directory User Management Program" 
+                          Style="{StaticResource CaptionStyle}" 
+                          Foreground="#B3FFFFFF"
+                          HorizontalAlignment="Center"
+                          Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Main Content -->
+        <Grid Grid.Row="1" Margin="0,32,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- Main Action Cards -->
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="Tableau de bord" 
+                          Style="{StaticResource HeadingStyle}"
+                          HorizontalAlignment="Center"
+                          Margin="0,0,0,32"/>
+                
+                <!-- Import Users Card -->
+                <Border Style="{StaticResource CardStyle}" Margin="16,8">
+                    <StackPanel>
+                        <TextBlock Text="📥 Importer des utilisateurs"
+                                  Style="{StaticResource SubheadingStyle}"
+                                  HorizontalAlignment="Center"/>
+                        <TextBlock Text="Importez des utilisateurs depuis un fichier CSV"
+                                  Style="{StaticResource CaptionStyle}"
+                                  HorizontalAlignment="Center"
+                                  TextWrapping="Wrap"
+                                  Margin="0,0,0,16"/>
+                        <Button Content="Importer des utilisateurs" 
+                               Style="{StaticResource ModernButtonStyle}"
+                               Click="ImportUsersButton_Click"
+                               HorizontalAlignment="Center"
+                               Width="200"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- View Users Card -->
+                <Border Style="{StaticResource CardStyle}" Margin="16,8">
+                    <StackPanel>
+                        <TextBlock Text="👥 Liste des utilisateurs"
+                                  Style="{StaticResource SubheadingStyle}"
+                                  HorizontalAlignment="Center"/>
+                        <TextBlock Text="Consultez et gérez tous les utilisateurs du domaine"
+                                  Style="{StaticResource CaptionStyle}"
+                                  HorizontalAlignment="Center"
+                                  TextWrapping="Wrap"
+                                  Margin="0,0,0,16"/>
+                        <Button Content="Afficher la liste" 
+                               Style="{StaticResource ModernButtonStyle}"
+                               Click="ShowUsersButton_Click"
+                               HorizontalAlignment="Center"
+                               Width="200"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Configuration Card -->
+                <Border Style="{StaticResource CardStyle}" Margin="16,8">
+                    <StackPanel>
+                        <TextBlock Text="⚙️ Configuration"
+                                  Style="{StaticResource SubheadingStyle}"
+                                  HorizontalAlignment="Center"/>
+                        <TextBlock Text="Configurez les paramètres de connexion et les options"
+                                  Style="{StaticResource CaptionStyle}"
+                                  HorizontalAlignment="Center"
+                                  TextWrapping="Wrap"
+                                  Margin="0,0,0,16"/>
+                        <Button Content="Configuration" 
+                               Style="{StaticResource ModernButtonStyle}"
+                               Click="ConfigurationButton_Click"
+                               HorizontalAlignment="Center"
+                               Width="200"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+        
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="#FAFAFA" Padding="16,12">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Text="Version 1.0" Style="{StaticResource CaptionStyle}"/>
+                <TextBlock Text=" • " Style="{StaticResource CaptionStyle}" Margin="8,0"/>
+                <TextBlock Text="ADUMP © 2024" Style="{StaticResource CaptionStyle}"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>
