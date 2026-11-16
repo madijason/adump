@@ -1,81 +1,134 @@
-﻿using System.DirectoryServices;
-using System.Collections.ObjectModel;
-using System.Windows;
 using System;
-using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.DirectoryServices;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace ADUMP
 {
     public partial class ListUser : Window
     {
+        private ICollectionView? view;
+        private bool loading;
+
         public ListUser()
         {
             InitializeComponent();
-            LoadUsers();
+            Loaded += async (_, _) => await LoadUsersAsync();
         }
 
-        private void LoadUsers()
+        private async Task LoadUsersAsync()
         {
-            try {
-                // Récupération du nom de domaine et détermination des valeurs de DC1 et DC2
-                string domainName = Properties.Settings.Default.domainName;
-                String[] DC = domainName.Split(".");
-                String DC1 = DC[0];
-                String DC2 = DC[1];
-
-                // Construction du chemin d'accès LDAP à partir des valeurs de DC1 et DC2
-                string ldapPath = $"LDAP://CN=Users,DC={DC1},DC={DC2}";
-                DirectoryEntry directoryEntry = new DirectoryEntry(ldapPath);
-                DirectorySearcher directorySearcher = new DirectorySearcher(directoryEntry);
-                directorySearcher.Filter = "(objectClass=user)";
-                directorySearcher.SearchScope = SearchScope.Subtree;
-                SearchResultCollection searchResults = directorySearcher.FindAll();
-
-                // Création d'une collection d'objets User à partir des résultats de la recherche
-                ObservableCollection<User> users = new ObservableCollection<User>();
-                foreach (SearchResult searchResult in searchResults)
-                {
-                    DirectoryEntry userEntry = searchResult.GetDirectoryEntry();
-                    User user = new User();
-                    user.LastName = (string)userEntry.Properties["sn"].Value;
-                    user.FirstName = (string)userEntry.Properties["givenName"].Value;
-                    user.Username = (string)userEntry.Properties["sAMAccountName"].Value;
-                    user.Email = (string)userEntry.Properties["mail"].Value;
-
-                    // Recherche du premier groupe dans le même dossier que l'utilisateur
-                    string userFolder = userEntry.Parent.Path;
-                    DirectoryEntry folderEntry = new DirectoryEntry(userFolder);
-                    DirectorySearcher folderSearcher = new DirectorySearcher(folderEntry);
-                    folderSearcher.Filter = "(objectClass=group)";
-                    folderSearcher.SearchScope = SearchScope.OneLevel;
-                    SearchResult groupResult = folderSearcher.FindOne();
-                    if (groupResult != null)
-                    {
-                        // Affectation du nom du groupe à la propriété "Class" de l'objet User
-                        DirectoryEntry groupEntry = groupResult.GetDirectoryEntry();
-                        user.Class = (string)groupEntry.Properties["cn"].Value;
-                    }
-                    else
-                    {
-                        user.Class = "";
-                    }
-
-                    users.Add(user);
-                }
-                dgUsers.ItemsSource = users;
-            } catch (Exception ex)
+            if (loading) return;
+            loading = true;
+            RefreshButton.IsEnabled = false;
+            EmptyState.Visibility = Visibility.Collapsed;
+            ListStatus.Text = "Chargement de l’annuaire…";
+            try
             {
-                MessageBox.Show(ex.ToString());
+                string domain = Properties.Settings.Default.domainName.Trim();
+                var users = await Task.Run(() => ReadUsers(domain));
+                view = CollectionViewSource.GetDefaultView(users);
+                view.Filter = MatchesSearch;
+                dgUsers.ItemsSource = view;
+                UpdateStatus();
+            }
+            catch (Exception ex)
+            {
+                dgUsers.ItemsSource = null;
+                view = null;
+                ListStatus.Text = "Impossible de charger les utilisateurs.";
+                EmptyState.Text = "Vérifiez le domaine et votre connexion.";
+                EmptyState.Visibility = Visibility.Visible;
+                if (IsLoaded) MessageBox.Show(this, ex.Message, "Active Directory", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                loading = false;
+                RefreshButton.IsEnabled = true;
             }
         }
+
+        private static List<User> ReadUsers(string domain)
+        {
+            if (!DomainConfiguration.IsValid(domain))
+                throw new InvalidOperationException("Configurez d’abord un nom de domaine DNS valide.");
+            string ldapPath = "LDAP://CN=Users," + DomainConfiguration.DistinguishedName(domain);
+            using var root = new DirectoryEntry(ldapPath);
+            using var search = new DirectorySearcher(root)
+            {
+                Filter = "(&(objectCategory=person)(objectClass=user))",
+                SearchScope = SearchScope.Subtree,
+                PageSize = 500
+            };
+            using var results = search.FindAll();
+            var users = new List<User>();
+            var classes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (SearchResult result in results)
+            {
+                using var entry = result.GetDirectoryEntry();
+                using var parent = entry.Parent;
+                if (!classes.TryGetValue(parent.Path, out var className))
+                {
+                    using var folderSearch = new DirectorySearcher(parent)
+                    {
+                        Filter = "(objectClass=group)", SearchScope = SearchScope.OneLevel
+                    };
+                    var group = folderSearch.FindOne();
+                    className = group is null || !group.Properties.Contains("cn")
+                        ? "" : Convert.ToString(group.Properties["cn"][0]) ?? "";
+                    classes[parent.Path] = className;
+                }
+                users.Add(new User
+                {
+                    LastName = Convert.ToString(entry.Properties["sn"].Value) ?? "",
+                    FirstName = Convert.ToString(entry.Properties["givenName"].Value) ?? "",
+                    Username = Convert.ToString(entry.Properties["sAMAccountName"].Value) ?? "",
+                    Email = Convert.ToString(entry.Properties["mail"].Value) ?? "",
+                    Class = className
+                });
+            }
+            return users;
+        }
+
+        private bool MatchesSearch(object item)
+        {
+            if (item is not User user) return false;
+            string query = SearchBox.Text.Trim();
+            return query.Length == 0 || new[] { user.LastName, user.FirstName, user.Username, user.Email, user.Class }
+                .Any(value => value.Contains(query, StringComparison.CurrentCultureIgnoreCase));
+        }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (view is null) return;
+            view.Refresh();
+            UpdateStatus();
+        }
+
+        private void UpdateStatus()
+        {
+            if (view is null) return;
+            int count = 0;
+            foreach (var item in view) count++;
+            ListStatus.Text = $"{count} utilisateur(s) affiché(s)";
+            EmptyState.Text = "Aucun utilisateur ne correspond à votre recherche.";
+            EmptyState.Visibility = count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private async void RefreshButton_Click(object sender, RoutedEventArgs e) => await LoadUsersAsync();
     }
 
     public class User
     {
-        public string LastName { get; set; }
-        public string FirstName { get; set; }
-        public string Username { get; set; }
-        public string Email { get; set; }
-        public string Class { get; set; }
+        public string LastName { get; set; } = "";
+        public string FirstName { get; set; } = "";
+        public string Username { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Class { get; set; } = "";
     }
 }
