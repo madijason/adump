@@ -46,5 +46,11 @@ namespace ADUMP.Properties {
                 this["domainName"] = value;
             }
         }
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("comma")]
+        public string csvDelimiter {
+            get { return (string)this["csvDelimiter"]; }
+            set { this["csvDelimiter"] = value; }
+        }
     }
 }
