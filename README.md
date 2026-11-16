@@ -1,34 +1,42 @@
-# adump
+# ADUMP
 
-**Description**: Logiciel de gestion pour l'Active Directory
-
-## Introduction
-`adump` est un logiciel développé en C# pour la gestion de l'Active Directory. Il permet aux administrateurs réseau de gérer efficacement les utilisateurs, les groupes et les ressources au sein d'un environnement Active Directory.
+Application Windows WPF en C# pour la gestion de comptes Active Directory.
 
 ## Fonctionnalités
-- Gestion des utilisateurs : création, modification, suppression des comptes utilisateurs.
-- Gestion des groupes : création, modification, suppression des groupes de sécurité et de distribution.
-- Gestion des ressources : attribution et révocation de permissions sur les ressources du réseau.
-- Rapports : génération de rapports sur l'état de l'Active Directory.
 
-## Installation
-Pour installer `adump`, suivez les étapes ci-dessous :
-1. Clonez le dépôt : `git clone https://github.com/madijason/adump.git`
-2. Ouvrez le projet dans votre IDE préféré (Visual Studio recommandé).
-3. Compilez le projet pour générer l'exécutable.
+- Tableau de bord et interface Fluent Windows.
+- Thème clair/sombre suivant les paramètres du système.
+- Import de comptes depuis un fichier CSV (virgule, point-virgule ou tabulation).
+- Consultation, recherche et actualisation des utilisateurs du conteneur Users.
+- Configuration persistante du domaine et du délimiteur.
+
+## Prérequis et compilation
+
+Windows, SDK .NET 10 et accès autorisé à un environnement Active Directory. Depuis la racine :
+
+```powershell
+dotnet restore ADUMP.sln
+dotnet build ADUMP.sln -c Release
+dotnet run --project ADUMP.csproj
+```
+
+Le thème Fluent utilise l’API WPF ThemeMode=System (.NET 9+), sans bibliothèque UI tierce.
 
 ## Utilisation
-1. Lancez l'application `adump`.
-2. Connectez-vous avec vos identifiants administrateur Active Directory.
-3. Utilisez le tableau de bord pour gérer les utilisateurs, les groupes et les ressources.
 
-## Contribuer
-Les contributions sont les bienvenues ! Pour contribuer, veuillez suivre ces étapes :
-1. Forkez le dépôt.
-2. Créez une branche pour votre fonctionnalité (`git checkout -b feature/ma-fonctionnalité`).
-3. Commitez vos changements (`git commit -am 'Ajoute une nouvelle fonctionnalité'`).
-4. Poussez votre branche (`git push origin feature/ma-fonctionnalité`).
-5. Créez une Pull Request.
+1. Ouvrir les paramètres et enregistrer le nom DNS du domaine.
+2. Consulter les utilisateurs ou préparer un CSV contenant une ligne d'en-tête puis huit colonnes dans cet ordre : nom, prénom, identifiant, mot de passe, e-mail, classe, chemin de profil, répertoire personnel.
+3. Sélectionner le délimiteur correspondant au fichier dans les paramètres. Vérifier les données et confirmer avant de lancer l’import.
+
+L'application utilise le contexte Windows courant. Tester les imports dans un domaine de laboratoire : ils modifient réellement l’annuaire et peuvent créer des dossiers. Un import n’est pas transactionnel. Protéger les fichiers CSV contenant des mots de passe.
+
+## Vérifications manuelles
+
+- Ouvrir les trois fenêtres et changer le thème Windows clair/sombre.
+- Enregistrer un domaine, rouvrir les paramètres et vérifier sa persistance.
+- Ouvrir l’annuaire avec un compte autorisé ; rechercher, effacer la recherche, puis actualiser.
+- Tester un import dans un domaine de laboratoire, avec un CSV valide et un fichier malformé ; vérifier aussi l’annulation du dialogue.
 
 ## Licence
-Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+Voir [LICENSE.txt](LICENSE.txt).
