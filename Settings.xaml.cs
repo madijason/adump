@@ -1,4 +1,5 @@
-﻿using System.Windows;
+using System;
+using System.Windows;
 
 namespace ADUMP
 {
@@ -7,28 +8,30 @@ namespace ADUMP
         public Settings()
         {
             InitializeComponent();
-        }
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (string.IsNullOrEmpty(DomainNameTextBox.Text))
-            {
-                e.Cancel = true;
-                MessageBox.Show("Veuillez entrer un nom de domaine avant de fermer la fenêtre ou d'enregistrer les modifications.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            DomainNameTextBox.Text = Properties.Settings.Default.domainName;
+            DelimiterBox.SelectedValue = Properties.Settings.Default.csvDelimiter;
+            if (DelimiterBox.SelectedIndex < 0) DelimiterBox.SelectedIndex = 0;
         }
 
         private void SaveChangesButton_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(DomainNameTextBox.Text))
+            string domain = DomainNameTextBox.Text.Trim();
+            if (!DomainConfiguration.IsValid(domain))
             {
-                MessageBox.Show("Veuillez entrer un nom de domaine avant de fermer la fenêtre ou d'enregistrer les modifications.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(this, "Entrez un nom de domaine DNS valide (ex. domaine.local).", "Configuration", MessageBoxButton.OK, MessageBoxImage.Warning);
+                DomainNameTextBox.Focus();
+                return;
             }
-            else
+            try
             {
-                Properties.Settings.Default.domainName = DomainNameTextBox.Text;
+                Properties.Settings.Default.domainName = domain;
+                Properties.Settings.Default.csvDelimiter = DelimiterBox.SelectedValue as string ?? "comma";
                 Properties.Settings.Default.Save();
-                MessageBox.Show(Properties.Settings.Default.domainName);
+                DialogResult = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Enregistrement impossible", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
